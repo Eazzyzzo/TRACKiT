@@ -1,0 +1,32 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  background-color: #F7F7F7;
+}
+
+.home-header {
+  font-size: 36px;
+  font-weight: bold;
+  color: #34A853;
+  margin-bottom: 20px;
+}
+
+.home-subheader {
+  font-size: 24px;
+  color: #FFC107;
+  margin-bottom: 40px;
+}
+
+.home-cta {
+  background-color: #2196F3;
+  color: #FFFFFF;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.home-cta:hover {
+  background-color: #1A73E8;
+}
