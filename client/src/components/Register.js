@@ -1,59 +1,37 @@
 import React, { useState } from 'react';
-import { registerUser } from '../api';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        password: ''
-    });
+  const [user, setUser] = useState({ username: '', password: '' });
+  const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  const handleRegister = (e) => {
+    e.preventDefault();
+    // Logic to send user registration data to backend
+    // Assuming registration is successful, redirect to login
+    navigate('/login');
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await registerUser(formData);
-            console.log('User registered successfully', response);
-            alert('Registration successful!');
-        } catch (error) {
-            console.error('Error registering user', error);
-            alert('Registration failed.');
-        }
-    };
-
-    return (
-        <form onSubmit={handleSubmit}>
-            <h2>Register</h2>
-            <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Name"
-                required
-            />
-            <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Email"
-                required
-            />
-            <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Password"
-                required
-            />
-            <button type="submit">Register</button>
-        </form>
-    );
+  return (
+    <div>
+      <h1>Register</h1>
+      <form onSubmit={handleRegister}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={user.username}
+          onChange={(e) => setUser({ ...user, username: e.target.value })}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={user.password}
+          onChange={(e) => setUser({ ...user, password: e.target.value })}
+        />
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  );
 };
 
 export default Register;

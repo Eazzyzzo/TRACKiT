@@ -1,25 +1,40 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './components/Home';
+import Register from './components/Register';
 import Login from './components/Login';
-import Profile from './components/Profile';
+import Dashboard from './components/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
-import Home from './components/Home'; // Import the Home component
+import Profile from './components/Profile'; // Import Profile component
 
-const App = () => {
-    return (
-        <Router>
-            <Routes>
-                {/* Public route */}
-                <Route path="/login" element={<Login />} />
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
 
-                {/* Protected route */}
-                <Route path="/profile" element={<ProtectedRoute component={Profile} />} />
-
-                {/* Home route */}
-                <Route path="/" element={<Home />} />
-            </Routes>
-        </Router>
-    );
-};
+        {/* Protected routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
+  );
+}
 
 export default App;

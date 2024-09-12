@@ -1,12 +1,20 @@
 import React from 'react';
-import './Home.css';
 
 const Home = () => {
   return (
-    <div className="home-container">
-      <h1 className="home-header">Welcome to TRACKiT</h1>
-      <h2 className="home-subheader">Track your progress, achieve your goals</h2>
-      <button className="home-cta">Get Started</button>
+    <div>
+      <h1>Welcome to TRACKiT</h1>
+      <p>Manage and track your activities with ease!</p>
+
+      {/* 'Get Started' button leads to registration page */}
+      <a href="/register">
+        <button>Get Started</button>
+      </a>
+
+      {/* 'Dashboard' button leads to login page if the user is not authenticated */}
+      <a href="/login">
+        <button>Dashboard</button>
+      </a>
     </div>
   );
 };
