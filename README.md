@@ -1,3 +1,6 @@
+
+![Screenshot_19-9-2024_0723_israeloguntolu wixsite com](https://github.com/user-attachments/assets/c59124a9-4ffc-46b4-9c76-f8341be9dbfc)
+
 # TRACKiT
 
 TRACKiT is a web application designed to help users track and improve their daily practice routines. It provides a customizable platform for setting goals, monitoring progress, and receiving feedback on various activities like learning an instrument, fitness goals, or any other skill development.
