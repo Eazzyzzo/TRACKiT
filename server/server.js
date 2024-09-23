@@ -13,6 +13,7 @@ console.log('Mongo URI:', process.env.MONGO_URI);
 // Import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const activityRoutes = require('./routes/activities');
 
 // Initialize Express app
 const app = express();
@@ -24,6 +25,7 @@ app.use(cors());
 // Define routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/activities', activityRoutes);
 
 // Root route to handle requests to the home page
 app.get('/', (req, res) => {
