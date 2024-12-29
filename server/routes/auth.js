@@ -37,7 +37,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// POST: /api/auth/login (Existing route)
+// POST: /api/auth/login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
