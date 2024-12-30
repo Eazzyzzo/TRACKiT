@@ -1,22 +1,44 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import API from '../../services/api';
+import ActivityChart from './ActivityChart'; // Import the chart component
 
-const ActivityDashboard = ({ refresh }) => {
+const ActivityDashboard = () => {
   const [activities, setActivities] = useState([]);
+  const [selectedActivity, setSelectedActivity] = useState(null);
 
   useEffect(() => {
-    // Fetch activities from backend using the pre-configured Axios instance
     const fetchActivities = async () => {
       try {
-        const response = await API.get('/activities');  // Automatically includes the token
-        setActivities(response.data); // Set fetched activities to state
+        const response = await API.get('/activities');
+        setActivities(response.data);
       } catch (error) {
         console.error('Error fetching activities:', error);
       }
     };
 
-    fetchActivities(); // Call the function to fetch activities
-  }, [refresh]);  // Dependency on "refresh" so that activities are refetched when it changes
+    fetchActivities();
+  }, []);
+
+  const handleViewSummary = async (activityId) => {
+    try {
+      const response = await API.get(`/activities/${activityId}`);
+      setSelectedActivity(response.data); // Set the selected activity for viewing its details
+    } catch (error) {
+      console.error('Error fetching activity summary:', error);
+    }
+  };
+
+  const handleDelete = async (activityId) => {
+    try {
+      await API.delete(`/activities/${activityId}`);
+      setActivities((prevActivities) => prevActivities.filter((a) => a._id !== activityId));
+      if (selectedActivity && selectedActivity._id === activityId) {
+        setSelectedActivity(null); // Clear selected activity if it's deleted
+      }
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+    }
+  };
 
   return (
     <div className="activity-dashboard">
@@ -27,26 +49,37 @@ const ActivityDashboard = ({ refresh }) => {
             <li key={activity._id}>
               <h3>{activity.name}</h3>
               <p>{activity.description}</p>
-              <strong>Metrics:</strong>
-              <ul>
-                {/* Display Quantitative Metrics */}
-                {Object.entries(activity.quantitativeMetrics).map(([key, value], index) => (
-                  <li key={index}>{`${key}: ${value}`}</li>
-                ))}
-                {/* Display Qualitative Metrics */}
-                {Object.entries(activity.qualitativeMetrics).map(([key, value], index) => (
-                  <li key={index}>{`${key}: ${value}`}</li>
-                ))}
-                {/* Display Frequency Metrics */}
-                {Object.entries(activity.frequencyMetrics).map(([key, value], index) => (
-                  <li key={index}>{`${key}: ${value}`}</li>
-                ))}
-              </ul>
+              <button onClick={() => handleViewSummary(activity._id)}>View Summary</button>
+              <button onClick={() => handleDelete(activity._id)}>Delete</button>
             </li>
           ))}
         </ul>
       ) : (
         <p>No activities yet.</p>
+      )}
+
+      {/* Display activity details and chart */}
+      {selectedActivity && (
+        <div className="activity-details">
+          <h3>{selectedActivity.name} Summary</h3>
+          <p>{selectedActivity.description}</p>
+          <ActivityChart metrics={selectedActivity.sessions.map((s) => s.metrics)} />
+          <strong>Metrics:</strong>
+          <ul>
+            {/* Quantitative Metrics */}
+            {Object.entries(selectedActivity.quantitativeMetrics || {}).map(([key, value], index) => (
+              <li key={index}>{`${key}: ${value}`}</li>
+            ))}
+            {/* Qualitative Metrics */}
+            {Object.entries(selectedActivity.qualitativeMetrics || {}).map(([key, value], index) => (
+              <li key={index}>{`${key}: ${value}`}</li>
+            ))}
+            {/* Frequency Metrics */}
+            {Object.entries(selectedActivity.frequencyMetrics || {}).map(([key, value], index) => (
+              <li key={index}>{`${key}: ${value}`}</li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
