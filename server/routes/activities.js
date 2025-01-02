@@ -12,6 +12,7 @@ router.post('/create', authMiddleware, async (req, res) => {
             quantitativeMetrics,
             qualitativeMetrics,
             frequencyMetrics,
+            metricUnits,
             rating,
             notes,
             goals
@@ -24,6 +25,7 @@ router.post('/create', authMiddleware, async (req, res) => {
             quantitativeMetrics,
             qualitativeMetrics,
             frequencyMetrics,
+	    metricUnits,
             rating,
             notes,
             goals,
@@ -75,6 +77,36 @@ router.get('/:id/summary', authMiddleware, async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Error fetching activity summary' });
     }
+});
+
+// Delete activities
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+
+    if (!activity) return res.status(404).json({ error: 'Activity not found' });
+    if (activity.user.toString() !== req.user._id.toString()) return res.status(403).json({ error: 'Unauthorized' });
+
+    await activity.remove();
+    res.status(200).json({ message: 'Activity deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error deleting activity' });
+  }
+});
+
+// fetch metrics
+router.get('/:id/metrics', authMiddleware, async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+
+    if (!activity) return res.status(404).json({ error: 'Activity not found' });
+    if (activity.user.toString() !== req.user._id.toString()) return res.status(403).json({ error: 'Unauthorized' });
+
+    const metrics = activity.sessions.map((session) => session.metrics);
+    res.status(200).json(metrics);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching metrics' });
+  }
 });
 
 module.exports = router;

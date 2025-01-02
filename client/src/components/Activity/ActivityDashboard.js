@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import API from '../../services/api';
-import ActivityChart from './ActivityChart'; // Import the chart component
+import axios from 'axios';
+import ActivityChart from './ActivityChart';
 
 const ActivityDashboard = () => {
   const [activities, setActivities] = useState([]);
@@ -9,34 +9,40 @@ const ActivityDashboard = () => {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const response = await API.get('/activities');
+        const token = localStorage.getItem('token');
+        const response = await axios.get('/api/activities', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setActivities(response.data);
       } catch (error) {
-        console.error('Error fetching activities:', error);
+        console.error('Error fetching activities:', error.response?.data || error.message);
       }
     };
-
     fetchActivities();
   }, []);
 
   const handleViewSummary = async (activityId) => {
     try {
-      const response = await API.get(`/activities/${activityId}`);
-      setSelectedActivity(response.data); // Set the selected activity for viewing its details
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`/api/activities/${activityId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSelectedActivity(response.data);
     } catch (error) {
-      console.error('Error fetching activity summary:', error);
+      console.error('Error fetching activity summary:', error.response?.data || error.message);
     }
   };
 
   const handleDelete = async (activityId) => {
     try {
-      await API.delete(`/activities/${activityId}`);
-      setActivities((prevActivities) => prevActivities.filter((a) => a._id !== activityId));
-      if (selectedActivity && selectedActivity._id === activityId) {
-        setSelectedActivity(null); // Clear selected activity if it's deleted
-      }
+      const token = localStorage.getItem('token');
+      await axios.delete(`/api/activities/${activityId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setActivities((prev) => prev.filter((activity) => activity._id !== activityId));
+      alert('Activity deleted successfully!');
     } catch (error) {
-      console.error('Error deleting activity:', error);
+      console.error('Error deleting activity:', error.response?.data || error.message);
     }
   };
 
@@ -58,27 +64,11 @@ const ActivityDashboard = () => {
         <p>No activities yet.</p>
       )}
 
-      {/* Display activity details and chart */}
       {selectedActivity && (
         <div className="activity-details">
           <h3>{selectedActivity.name} Summary</h3>
           <p>{selectedActivity.description}</p>
           <ActivityChart metrics={selectedActivity.sessions.map((s) => s.metrics)} />
-          <strong>Metrics:</strong>
-          <ul>
-            {/* Quantitative Metrics */}
-            {Object.entries(selectedActivity.quantitativeMetrics || {}).map(([key, value], index) => (
-              <li key={index}>{`${key}: ${value}`}</li>
-            ))}
-            {/* Qualitative Metrics */}
-            {Object.entries(selectedActivity.qualitativeMetrics || {}).map(([key, value], index) => (
-              <li key={index}>{`${key}: ${value}`}</li>
-            ))}
-            {/* Frequency Metrics */}
-            {Object.entries(selectedActivity.frequencyMetrics || {}).map(([key, value], index) => (
-              <li key={index}>{`${key}: ${value}`}</li>
-            ))}
-          </ul>
         </div>
       )}
     </div>

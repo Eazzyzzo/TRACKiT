@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const CreateActivityForm = ({ onActivityCreated }) => {  // Optional callback to trigger refresh
+const CreateActivityForm = ({ onActivityCreated }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-
-  // State to track the selected metrics
   const [selectedMetrics, setSelectedMetrics] = useState({
     count: false,
     duration: false,
@@ -20,69 +18,67 @@ const CreateActivityForm = ({ onActivityCreated }) => {  // Optional callback to
     streak: false,
     frequency: false,
   });
+  const [metricUnits, setMetricUnits] = useState({
+    distance: '',
+    weight: '',
+    duration: '',
+    speed: '',
+  });
 
   // Handle checkbox changes for metric selection
   const handleMetricChange = (e) => {
     setSelectedMetrics({
       ...selectedMetrics,
-      [e.target.name]: e.target.checked, // Toggle the checkbox state
+      [e.target.name]: e.target.checked,
     });
   };
 
-  // Form submission handler
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Retrieve the token from localStorage
     const token = localStorage.getItem('token');
-
-    // Ensure the token exists
     if (!token) {
-      console.error('No token found, user is not authenticated.');
+      console.error('No token found. User is not authenticated.');
       return;
     }
 
-    // Prepare the selected metrics
-    const selectedQuantitativeMetrics = {};
-    const selectedQualitativeMetrics = {};
-    const selectedFrequencyMetrics = {};
+    // Prepare the metrics
+    const quantitativeMetrics = {};
+    const qualitativeMetrics = {};
+    const frequencyMetrics = {};
 
-    // Map the selected metrics to the appropriate categories
-    if (selectedMetrics.count) selectedQuantitativeMetrics.count = 0;
-    if (selectedMetrics.duration) selectedQuantitativeMetrics.duration = 0;
-    if (selectedMetrics.distance) selectedQuantitativeMetrics.distance = 0;
-    if (selectedMetrics.weight) selectedQuantitativeMetrics.weight = 0;
-    if (selectedMetrics.speed) selectedQuantitativeMetrics.speed = 0;
-    if (selectedMetrics.repetitions) selectedQuantitativeMetrics.repetitions = 0;
+    if (selectedMetrics.count) quantitativeMetrics.count = 0;
+    if (selectedMetrics.duration) quantitativeMetrics.duration = 0;
+    if (selectedMetrics.distance) quantitativeMetrics.distance = 0;
+    if (selectedMetrics.weight) quantitativeMetrics.weight = 0;
+    if (selectedMetrics.speed) quantitativeMetrics.speed = 0;
+    if (selectedMetrics.repetitions) quantitativeMetrics.repetitions = 0;
 
-    if (selectedMetrics.mood) selectedQualitativeMetrics.mood = '';
-    if (selectedMetrics.difficulty) selectedQualitativeMetrics.difficulty = '';
-    if (selectedMetrics.enjoyment) selectedQualitativeMetrics.enjoyment = '';
-    if (selectedMetrics.focus) selectedQualitativeMetrics.focus = '';
+    if (selectedMetrics.mood) qualitativeMetrics.mood = '';
+    if (selectedMetrics.difficulty) qualitativeMetrics.difficulty = '';
+    if (selectedMetrics.enjoyment) qualitativeMetrics.enjoyment = '';
+    if (selectedMetrics.focus) qualitativeMetrics.focus = '';
 
-    if (selectedMetrics.streak) selectedFrequencyMetrics.streak = 0;
-    if (selectedMetrics.frequency) selectedFrequencyMetrics.frequency = 0;
+    if (selectedMetrics.streak) frequencyMetrics.streak = 0;
+    if (selectedMetrics.frequency) frequencyMetrics.frequency = 0;
 
-    // Prepare the activity data to be sent to the backend
     const activityData = {
       name,
       description,
-      quantitativeMetrics: selectedQuantitativeMetrics,
-      qualitativeMetrics: selectedQualitativeMetrics,
-      frequencyMetrics: selectedFrequencyMetrics,
+      quantitativeMetrics,
+      qualitativeMetrics,
+      frequencyMetrics,
+      metricUnits, // Include the units in the activity data
     };
 
     try {
-      // Send the POST request to create the activity
       const response = await axios.post('/api/activities/create', activityData, {
         headers: {
-          Authorization: `Bearer ${token}`, // Attach the JWT token
+          Authorization: `Bearer ${token}`,
         },
       });
-
       console.log('Activity created successfully:', response.data);
-
-      // Reset the form after successful submission
+      onActivityCreated(); // Trigger parent callback to refresh activities
       setName('');
       setDescription('');
       setSelectedMetrics({
@@ -99,11 +95,12 @@ const CreateActivityForm = ({ onActivityCreated }) => {  // Optional callback to
         streak: false,
         frequency: false,
       });
-
-      // Trigger the parent callback to refresh the activity dashboard
-      if (onActivityCreated) {
-        onActivityCreated();
-      }
+      setMetricUnits({
+        distance: '',
+        weight: '',
+        duration: '',
+        speed: '',
+      });
     } catch (error) {
       console.error('Error creating activity:', error.response?.data || error.message);
     }
@@ -113,7 +110,6 @@ const CreateActivityForm = ({ onActivityCreated }) => {  // Optional callback to
     <form onSubmit={handleSubmit}>
       <h2>Create New Activity</h2>
 
-      {/* Activity Name */}
       <label>Activity Name:</label>
       <input
         type="text"
@@ -122,35 +118,14 @@ const CreateActivityForm = ({ onActivityCreated }) => {  // Optional callback to
         required
       />
 
-      {/* Activity Description */}
       <label>Description:</label>
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
 
-      {/* Select Metrics */}
       <h3>Select Metrics to Track</h3>
 
-      {/* Quantitative Metrics */}
-      <label>
-        <input
-          type="checkbox"
-          name="count"
-          checked={selectedMetrics.count}
-          onChange={handleMetricChange}
-        />
-        Count
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="duration"
-          checked={selectedMetrics.duration}
-          onChange={handleMetricChange}
-        />
-        Duration (time spent)
-      </label>
       <label>
         <input
           type="checkbox"
@@ -160,6 +135,17 @@ const CreateActivityForm = ({ onActivityCreated }) => {  // Optional callback to
         />
         Distance
       </label>
+      {selectedMetrics.distance && (
+        <input
+          type="text"
+          placeholder="Unit (e.g., meters)"
+          value={metricUnits.distance}
+          onChange={(e) =>
+            setMetricUnits({ ...metricUnits, distance: e.target.value })
+          }
+        />
+      )}
+
       <label>
         <input
           type="checkbox"
@@ -169,6 +155,37 @@ const CreateActivityForm = ({ onActivityCreated }) => {  // Optional callback to
         />
         Weight
       </label>
+      {selectedMetrics.weight && (
+        <input
+          type="text"
+          placeholder="Unit (e.g., kg)"
+          value={metricUnits.weight}
+          onChange={(e) =>
+            setMetricUnits({ ...metricUnits, weight: e.target.value })
+          }
+        />
+      )}
+
+      <label>
+        <input
+          type="checkbox"
+          name="duration"
+          checked={selectedMetrics.duration}
+          onChange={handleMetricChange}
+        />
+        Duration
+      </label>
+      {selectedMetrics.duration && (
+        <input
+          type="text"
+          placeholder="Unit (e.g., minutes)"
+          value={metricUnits.duration}
+          onChange={(e) =>
+            setMetricUnits({ ...metricUnits, duration: e.target.value })
+          }
+        />
+      )}
+
       <label>
         <input
           type="checkbox"
@@ -178,17 +195,18 @@ const CreateActivityForm = ({ onActivityCreated }) => {  // Optional callback to
         />
         Speed
       </label>
-      <label>
+      {selectedMetrics.speed && (
         <input
-          type="checkbox"
-          name="repetitions"
-          checked={selectedMetrics.repetitions}
-          onChange={handleMetricChange}
+          type="text"
+          placeholder="Unit (e.g., m/s)"
+          value={metricUnits.speed}
+          onChange={(e) =>
+            setMetricUnits({ ...metricUnits, speed: e.target.value })
+          }
         />
-        Repetitions
-      </label>
+      )}
 
-      {/* Qualitative Metrics */}
+      {/* Other Metrics */}
       <label>
         <input
           type="checkbox"
@@ -225,8 +243,6 @@ const CreateActivityForm = ({ onActivityCreated }) => {  // Optional callback to
         />
         Focus
       </label>
-
-      {/* Frequency Metrics */}
       <label>
         <input
           type="checkbox"
@@ -246,7 +262,6 @@ const CreateActivityForm = ({ onActivityCreated }) => {  // Optional callback to
         Frequency
       </label>
 
-      {/* Submit Button */}
       <button type="submit">Create Activity</button>
     </form>
   );

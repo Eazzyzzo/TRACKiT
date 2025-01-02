@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Schema for individual sessions within an activity
 const SessionSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   metrics: {
@@ -12,13 +13,14 @@ const SessionSchema = new mongoose.Schema({
     difficulty: { type: String, default: '' },
     enjoyment: { type: String, default: '' },
     focus: { type: String, default: '' },
-  }
+  },
 });
 
+// Schema for the activity, including metric units
 const ActivitySchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String },
-  
+
   quantitativeMetrics: {
     count: { type: Number, default: 0 },
     duration: { type: Number, default: 0 },
@@ -39,12 +41,22 @@ const ActivitySchema = new mongoose.Schema({
     frequency: { type: Number, default: 0 },
   },
 
-  rating: { type: Number, default: 0 },
-  notes: { type: String, default: '' },
-  goals: { type: String, default: '' },
+  // Add metric units field
+  metricUnits: {
+    distance: { type: String, default: 'meters' },
+    weight: { type: String, default: 'kg' },
+    duration: { type: String, default: 'minutes' },
+    speed: { type: String, default: 'm/s' },
+    // Add units for other metrics as needed
+  },
 
-  sessions: [SessionSchema], // Store sessions for the activity
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Reference to User
-}, { timestamps: true });
+  // Reference user who created the activity
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+
+  // Sessions tracked for the activity
+  sessions: [SessionSchema],
+
+  createdAt: { type: Date, default: Date.now },
+});
 
 module.exports = mongoose.model('Activity', ActivitySchema);
