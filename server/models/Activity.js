@@ -3,60 +3,35 @@ const mongoose = require('mongoose');
 // Schema for individual sessions within an activity
 const SessionSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
-  metrics: {
-    count: { type: Number, default: 0 },
-    duration: { type: Number, default: 0 },
-    distance: { type: Number, default: 0 },
-    speed: { type: Number, default: 0 },
-    weight: { type: Number, default: 0 },
-    mood: { type: String, default: '' },
-    difficulty: { type: String, default: '' },
-    enjoyment: { type: String, default: '' },
-    focus: { type: String, default: '' },
-  },
+  metrics: [
+    {
+      name: { type: String, required: true }, // Name of the metric (e.g., distance, weight)
+      value: { type: Number, default: 0 },   // Value logged for the metric
+    },
+  ],
 });
 
-// Schema for the activity, including metric units
+// Schema for the activity, including dynamic metrics and metric units
 const ActivitySchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String },
+  name: { type: String, required: true }, // Name of the activity
+  description: { type: String },          // Optional description of the activity
 
-  quantitativeMetrics: {
-    count: { type: Number, default: 0 },
-    duration: { type: Number, default: 0 },
-    distance: { type: Number, default: 0 },
-    speed: { type: Number, default: 0 },
-    weight: { type: Number, default: 0 },
-  },
-
-  qualitativeMetrics: {
-    mood: { type: String, default: '' },
-    difficulty: { type: String, default: '' },
-    enjoyment: { type: String, default: '' },
-    focus: { type: String, default: '' },
-  },
-
-  frequencyMetrics: {
-    streak: { type: Number, default: 0 },
-    frequency: { type: Number, default: 0 },
-  },
-
-  // Add metric units field
-  metricUnits: {
-    distance: { type: String, default: 'meters' },
-    weight: { type: String, default: 'kg' },
-    duration: { type: String, default: 'minutes' },
-    speed: { type: String, default: 'm/s' },
-    // Add units for other metrics as needed
-  },
-
-  // Reference user who created the activity
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  // Define trackable metrics with dynamic names and units
+  metrics: [
+    {
+      name: { type: String, required: true }, // Name of the metric (e.g., distance, weight)
+      unit: { type: String, required: true }, // Unit of the metric (e.g., meters, kg)
+    },
+  ],
 
   // Sessions tracked for the activity
-  sessions: [SessionSchema],
+  sessions: [SessionSchema], 
 
-  createdAt: { type: Date, default: Date.now },
+  // Reference to the user who created the activity
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+
+  // Timestamps
+  createdAt: { type: Date, default: Date.now }, // Automatically set creation date
 });
 
 module.exports = mongoose.model('Activity', ActivitySchema);

@@ -1,36 +1,54 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import API from '../../services/api'; // Assuming Axios is pre-configured
+import axios from 'axios';
 
 const ActivityDetails = () => {
-  const { id } = useParams(); // Get the activity ID from the route params
+  const { id } = useParams(); // Get activity ID from URL parameters
   const [activity, setActivity] = useState(null);
-  const [sessionData, setSessionData] = useState({
-    distance: '',
-    weight: '',
-    duration: '',
-  });
+  const [sessionData, setSessionData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchActivity = async () => {
+    const fetchActivityDetails = async () => {
       try {
-        const response = await API.get(`/activities/${id}`);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`/api/activities/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setActivity(response.data);
+
+        // Initialize session data based on metrics
+        setSessionData(
+          response.data.metrics.map((metric) => ({ name: metric.name, value: '' }))
+        );
       } catch (error) {
-        console.error('Error fetching activity:', error);
+        console.error('Error fetching activity details:', error);
       } finally {
-        setLoading(false); // Ensure loading is false even if an error occurs
+        setLoading(false);
       }
     };
-    fetchActivity();
+
+    fetchActivityDetails();
   }, [id]);
 
-  const handleSessionSubmit = async (e) => {
+  const handleLogSession = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await API.post(`/activities/${id}/session`, { metrics: sessionData });
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `/api/activities/${id}/session`,
+        { metrics: sessionData },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
       alert('Session logged successfully!');
+      console.log('Session logged successfully:', response.data);
+
+      // Clear input values after successful logging
+      setSessionData(
+        sessionData.map((metric) => ({ ...metric, value: '' }))
+      );
     } catch (error) {
       console.error('Error logging session:', error);
     }
@@ -45,28 +63,31 @@ const ActivityDetails = () => {
           <h2>{activity.name}</h2>
           <p>{activity.description}</p>
 
-          <form onSubmit={handleSessionSubmit}>
-            <label>Distance ({activity.metricUnits.distance || 'units'}):</label>
-            <input
-              type="number"
-              value={sessionData.distance}
-              onChange={(e) => setSessionData({ ...sessionData, distance: e.target.value })}
-            />
-
-            <label>Weight ({activity.metricUnits.weight || 'units'}):</label>
-            <input
-              type="number"
-              value={sessionData.weight}
-              onChange={(e) => setSessionData({ ...sessionData, weight: e.target.value })}
-            />
-
-            <label>Duration ({activity.metricUnits.duration || 'units'}):</label>
-            <input
-              type="number"
-              value={sessionData.duration}
-              onChange={(e) => setSessionData({ ...sessionData, duration: e.target.value })}
-            />
-
+          <form onSubmit={handleLogSession}>
+            {activity.metrics?.length > 0 ? (
+              activity.metrics.map((metric, index) => (
+                <div key={index}>
+                  <label>{`${metric.name} (${metric.unit}):`}</label>
+                  <input
+                    type="number"
+                    value={
+                      sessionData.find((s) => s.name === metric.name)?.value || ''
+                    }
+                    onChange={(e) =>
+                      setSessionData(
+                        sessionData.map((s) =>
+                          s.name === metric.name
+                            ? { ...s, value: e.target.value }
+                            : s
+                        )
+                      )
+                    }
+                  />
+                </div>
+              ))
+            ) : (
+              <p>No metrics defined for this activity.</p>
+            )}
             <button type="submit">Log Session</button>
           </form>
         </div>
