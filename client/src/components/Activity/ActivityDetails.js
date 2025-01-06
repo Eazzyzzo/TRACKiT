@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const ActivityDetails = () => {
   const { id } = useParams(); // Get activity ID from URL parameters
+  const navigate = useNavigate();
   const [activity, setActivity] = useState(null);
   const [sessionData, setSessionData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +18,7 @@ const ActivityDetails = () => {
         });
         setActivity(response.data);
 
-        // Initialize session data based on metrics
+        // Initialize session data for input fields
         setSessionData(
           response.data.metrics.map((metric) => ({ name: metric.name, value: '' }))
         );
@@ -36,18 +37,15 @@ const ActivityDetails = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
+      await axios.post(
         `/api/activities/${id}/session`,
         { metrics: sessionData },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       alert('Session logged successfully!');
-      console.log('Session logged successfully:', response.data);
-
-      // Clear input values after successful logging
       setSessionData(
-        sessionData.map((metric) => ({ ...metric, value: '' }))
+        sessionData.map((metric) => ({ ...metric, value: '' })) // Clear input fields
       );
     } catch (error) {
       console.error('Error logging session:', error);
@@ -58,6 +56,9 @@ const ActivityDetails = () => {
 
   return (
     <div>
+      <button onClick={() => navigate(-1)}>Back</button>
+      <button onClick={() => navigate('/')}>Home</button>
+
       {activity ? (
         <div>
           <h2>{activity.name}</h2>
@@ -99,3 +100,4 @@ const ActivityDetails = () => {
 };
 
 export default ActivityDetails;
+

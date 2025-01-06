@@ -1,15 +1,22 @@
+body {
+  font-family: 'Inter', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to right, #f8f9fa, #e9ecef);
+  color: #495057;
+}
+
+/* App Container */
 .App {
   text-align: center;
-  background: linear-gradient(to right, #f8f9fa, #e9ecef);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: 'Inter', sans-serif;
-  color: #495057;
 }
 
+/* Header Section */
 .App-header {
   background-color: #343a40;
   min-height: 60vh;
@@ -33,6 +40,7 @@
   color: #ced4da;
 }
 
+/* Content Section */
 .App-content {
   width: 90%;
   max-width: 1200px;
@@ -49,51 +57,117 @@
   margin-bottom: 20px;
 }
 
-.App-link {
-  color: #0d6efd;
-  text-decoration: none;
-  font-weight: bold;
-  margin-top: 20px;
-}
-
-.App-link:hover {
-  color: #0b5ed7;
-  text-decoration: underline;
-}
-
-.button {
-  padding: 10px 20px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
-  background-color: #0d6efd;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.button:hover {
-  background-color: #0b5ed7;
-}
-
+/* Activity Card */
+.activity-card,
 .card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  background: #f8f9fa;
+  background: #ffffff;
   padding: 20px;
-  margin: 10px;
+  margin: 20px auto;
+  width: 300px;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.activity-card h3,
 .card h3 {
   font-size: 1.5rem;
   color: #212529;
   margin-bottom: 5px;
 }
 
+.activity-card p,
 .card p {
   font-size: 1rem;
   color: #495057;
+}
+
+.activity-card button,
+.card button {
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.activity-card button:hover,
+.card button:hover {
+  background-color: #0b5ed7;
+}
+
+/* Activity Table */
+.activity-table {
+  width: 100%;
+  margin: 20px 0;
+  border-collapse: collapse;
+}
+
+.activity-table th,
+.activity-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.activity-table th {
+  background-color: #f1f3f5;
+  font-weight: bold;
+  color: #212529;
+}
+
+.activity-table td {
+  background-color: #ffffff;
+}
+
+/* Charts Section */
+.charts {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.chart-container {
+  width: 45%;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+/* Buttons */
+.button,
+.navigation-buttons button {
+  background-color: #42a5f5;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover,
+.navigation-buttons button:hover {
+  background-color: #1e88e5;
+}
+
+/* Navigation Buttons */
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.navigation-buttons button {
+  background-color: #ef5350;
+}
+
+.navigation-buttons button:hover {
+  background-color: #e53935;
 }
