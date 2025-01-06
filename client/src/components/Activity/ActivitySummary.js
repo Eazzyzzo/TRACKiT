@@ -17,16 +17,35 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 const ActivitySummary = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [sessions, setSessions] = useState([]);
+  const [sessions, setSessions] = useState([]); // Default as an empty array
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        const response = await axios.get(`/api/activities/${id}/summary`);
-        setSessions(response.data);
+        const token = localStorage.getItem('authToken'); // Get token from localStorage
+        if (!token) {
+          throw new Error('No token found. Please log in again.');
+        }
+
+        const response = await axios.get(`/api/activities/${id}/summary`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log('API Response:', response.data); // Debugging the API response
+
+        // Handle API response structure
+        const { summaryData } = response.data; // Assuming `summaryData` contains the array
+        if (!Array.isArray(summaryData)) {
+          throw new Error('Invalid data format');
+        }
+
+        setSessions(summaryData); // Set sessions to the extracted array
       } catch (error) {
-        console.error('Error fetching session summary:', error);
+        console.error('Error fetching session summary:', error.message);
+        setSessions([]); // Default to an empty array in case of an error
       } finally {
         setLoading(false);
       }
@@ -37,12 +56,12 @@ const ActivitySummary = () => {
 
   if (loading) return <p>Loading summary...</p>;
 
-  // Calculate cumulative metrics for the bar chart
+  // Ensure sessions is an array before calling reduce
   const cumulativeMetrics = sessions.reduce(
     (acc, session) => {
-      acc[0] += session.metrics.metric1 || 0;
-      acc[1] += session.metrics.metric2 || 0;
-      acc[2] += session.metrics.metric3 || 0;
+      acc[0] += session.metrics?.metric1 || 0;
+      acc[1] += session.metrics?.metric2 || 0;
+      acc[2] += session.metrics?.metric3 || 0;
       return acc;
     },
     [0, 0, 0]
@@ -71,9 +90,10 @@ const ActivitySummary = () => {
           <tr>
             <th>Date</th>
             <th>Time</th>
-            <th>Metric 1</th>
-            <th>Metric 2</th>
-            <th>Metric 3</th>
+            {sessions.length > 0 &&
+              Object.keys(sessions[0]?.metrics || {}).map((metric, index) => (
+                <th key={index}>{metric}</th>
+              ))}
           </tr>
         </thead>
         <tbody>
@@ -81,9 +101,9 @@ const ActivitySummary = () => {
             <tr key={index}>
               <td>{new Date(session.date).toLocaleDateString()}</td>
               <td>{session.time}</td>
-              <td>{session.metrics.metric1 || '-'}</td>
-              <td>{session.metrics.metric2 || '-'}</td>
-              <td>{session.metrics.metric3 || '-'}</td>
+              {Object.values(session.metrics || {}).map((value, idx) => (
+                <td key={idx}>{value}</td>
+              ))}
             </tr>
           ))}
         </tbody>

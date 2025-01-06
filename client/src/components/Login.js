@@ -11,25 +11,11 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      // Ensure there are no spaces in the API URL
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, {
-        email,
-        password,
-      });
+    // Prepare credentials
+    const credentials = { email, password };
 
-      // Extract the token from the response
-      const { token } = response.data;
-
-      // Store the token in localStorage
-      localStorage.setItem('token', token);
-
-      // Navigate to the dashboard
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Error logging in:', error.response?.data || error.message);
-      setError('Login failed. Please check your credentials.');
-    }
+    // Call the reusable handleLogin function
+    await handleLogin(credentials, navigate, setError);
   };
 
   return (
@@ -56,3 +42,26 @@ const Login = () => {
 };
 
 export default Login;
+
+// Reusable login handler (import this function)
+const handleLogin = async (credentials, navigate, setError) => {
+  try {
+    const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, credentials);
+    const { token } = response.data;
+
+    // Store the token in localStorage using a consistent key
+    localStorage.setItem('authToken', token);
+
+    console.log('Token stored successfully:', token);
+
+    // Navigate to the dashboard
+    navigate('/dashboard');
+  } catch (error) {
+    console.error('Error during login:', error.response?.data || error.message);
+
+    // Update error state if provided
+    if (setError) {
+      setError('Login failed. Please check your credentials.');
+    }
+  }
+};

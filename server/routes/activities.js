@@ -3,16 +3,17 @@ const router = express.Router();
 const Activity = require('../models/Activity');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// Create a new activity
+// Create a new activity with sessions
 router.post('/create', authMiddleware, async (req, res) => {
   try {
-    const { name, description, metrics } = req.body; // Collect data dynamically
+    const { name, description, metrics, sessions } = req.body; // Collect data dynamically
     const userId = req.user._id;
 
     const newActivity = new Activity({
       name,
       description,
       metrics: metrics || [], // Default to an empty array
+      sessions: sessions || [],
       user: userId,
     });
 
@@ -54,14 +55,14 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // Log a session for an activity
 router.post('/:id/session', authMiddleware, async (req, res) => {
   try {
-    const { metrics } = req.body; // Metrics for the session
+    const { date, metrics } = req.body; // Metrics and Date for the session
     const activity = await Activity.findById(req.params.id);
 
     if (!activity) return res.status(404).json({ error: 'Activity not found' });
     if (activity.user.toString() !== req.user._id.toString())
       return res.status(403).json({ error: 'Unauthorized' });
 
-    activity.sessions.push({ metrics }); // Add new session
+    activity.sessions.push({ date, metrics }); // Add new session
     await activity.save();
 
     res.status(200).json(activity);
@@ -80,12 +81,24 @@ router.get('/:id/summary', authMiddleware, async (req, res) => {
     if (activity.user.toString() !== req.user._id.toString())
       return res.status(403).json({ error: 'Unauthorized' });
 
-    const summaryData = activity.sessions.map((session, index) => ({
-      session: index + 1,
-      metrics: session.metrics,
-    }));
+    // Generate a list of unique metric names for table headers
+    const uniqueMetricNames = [...new Set(activity.metrics.map((m) => m.name))];
 
-    res.status(200).json(summaryData); // Return the session data
+    // Transform sessions into table-friendly format
+    const summaryData = activity.sessions.map((session) => {
+      const sessionMetrics = session.metrics.reduce((acc, metric) => {
+        acc[metric.name] = metric.value; // Flatten metric into key-value pair
+        return acc;
+      }, {});
+
+      return {
+        date: new Date(session.date).toISOString().split('T')[0], // Extract date
+        time: new Date(session.date).toISOString().split('T')[1].slice(0, 5), // Extract time
+        metrics: sessionMetrics,
+      };
+    });
+
+    res.status(200).json({ summaryData, uniqueMetricNames });
   } catch (error) {
     console.error('Error fetching activity summary:', error);
     res.status(500).json({ error: 'Error fetching activity summary' });
