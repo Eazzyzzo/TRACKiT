@@ -1,7 +1,9 @@
-{
+{  
   "name": "trackit",
   "version": "1.0.0",
-  "description": "",
+  "engines": {
+    "node": "22.x"
+  }"description": "",
   "main": "index.js",
   "scripts": {
     "start": "node server/server.js",
