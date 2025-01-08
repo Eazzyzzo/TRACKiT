@@ -1,7 +1,13 @@
 import axios from 'axios';
 
+// Leverage environment variables for a more robust approach
+const API_URL_DEV = process.env.REACT_APP_API_URL_DEV || 'http://localhost:5001/api';
+const API_URL_PROD = process.env.REACT_APP_API_URL_PROD || 'https://vercel.com/israels-projects-d88997c7/trackit/ErUocxBG9MZTN5fnzaVJY7RGGsoE';
+
+const baseUrl = process.env.NODE_ENV === 'production' ? API_URL_PROD : API_URL_DEV;
+
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  baseURL: baseUrl,
   withCredentials: true, // Ensure cookies are sent with requests
 });
 
