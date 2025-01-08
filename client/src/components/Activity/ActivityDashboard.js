@@ -10,13 +10,21 @@ const ActivityDashboard = () => {
     const fetchActivities = async () => {
       try {
         const token = localStorage.getItem('token');
+	if (!token) throw new Error('No token found.');
+
         const response = await axios.get('/api/activities', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setActivities(response.data);
       } catch (error) {
+	if (error.response?.status === 401) {
+      console.error('Token expired. Attempting to refresh...');
+      // Call refresh logic here or redirect to login
+      window.location.href = '/login';
+    } else {
         console.error('Error fetching activities:', error.response?.data || error.message);
       }
+     }
     };
     fetchActivities();
   }, []);

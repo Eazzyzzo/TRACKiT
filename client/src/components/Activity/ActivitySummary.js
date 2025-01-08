@@ -23,7 +23,7 @@ const ActivitySummary = () => {
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        const token = localStorage.getItem('authToken'); // Get token from localStorage
+        const token = localStorage.getItem('accessToken'); // Get token from localStorage
         if (!token) {
           throw new Error('No token found. Please log in again.');
         }

@@ -22,9 +22,10 @@ const CreateActivityForm = ({ onActivityCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken'); // Use 'accessToken'
     if (!token) {
-      console.error('No token found, user is not authenticated.');
+      console.error('No access token found. Redirecting to login...');
+      window.location.href = '/login';
       return;
     }
 
@@ -36,9 +37,7 @@ const CreateActivityForm = ({ onActivityCreated }) => {
 
     try {
       const response = await axios.post('/api/activities/create', activityData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       console.log('Activity created successfully:', response.data);
@@ -47,7 +46,12 @@ const CreateActivityForm = ({ onActivityCreated }) => {
       setSelectedMetrics([]);
       onActivityCreated();
     } catch (error) {
-      console.error('Error creating activity:', error.response?.data || error.message);
+      if (error.response?.status === 401) {
+        console.error('Token expired. Redirecting to login...');
+        window.location.href = '/login';
+      } else {
+        console.error('Error creating activity:', error.response?.data || error.message);
+      }
     }
   };
 
@@ -64,10 +68,7 @@ const CreateActivityForm = ({ onActivityCreated }) => {
       />
 
       <label>Description:</label>
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
+      <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
 
       <h3>Trackable Metrics</h3>
       {selectedMetrics.length > 0 ? (
@@ -113,4 +114,3 @@ const CreateActivityForm = ({ onActivityCreated }) => {
 };
 
 export default CreateActivityForm;
-

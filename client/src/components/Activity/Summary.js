@@ -21,8 +21,8 @@ const Summary = () => {
   useEffect(() => {
     const fetchSessionData = async () => {
       try {
-        const response = await fetch(`/api/activities/${id}/sessions`); // Replace with actual API endpoint
-        const data = await response.json();
+        const response = await axios.get(`/api/activities/${id}/sessions`); // Replace with actual API endpoint
+        const data = response.data;
         setSessionData(data);
 
         // Calculate cumulative metrics

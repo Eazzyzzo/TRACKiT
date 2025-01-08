@@ -8,11 +8,14 @@ const ActivityDetails = () => {
   const [activity, setActivity] = useState(null);
   const [sessionData, setSessionData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // State for error handling
 
   useEffect(() => {
     const fetchActivityDetails = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('accessToken'); // Use 'accessToken'
+        if (!token) throw new Error('No access token found.');
+
         const response = await axios.get(`/api/activities/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -23,6 +26,7 @@ const ActivityDetails = () => {
           response.data.metrics.map((metric) => ({ name: metric.name, value: '' }))
         );
       } catch (error) {
+        setError(error); // Store error for handling
         console.error('Error fetching activity details:', error);
       } finally {
         setLoading(false);
@@ -36,7 +40,7 @@ const ActivityDetails = () => {
     e.preventDefault();
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       await axios.post(
         `/api/activities/${id}/session`,
         { metrics: sessionData },
@@ -51,6 +55,16 @@ const ActivityDetails = () => {
       console.error('Error logging session:', error);
     }
   };
+
+  // Handle errors if present
+  if (error) {
+    if (error.response?.status === 401) {
+      // Refresh token or redirect to login (handle appropriately)
+      window.location.href = '/login';
+    } else {
+      return <p>Error fetching activity details: {error.message}</p>;
+    }
+  }
 
   if (loading) return <p>Loading activity...</p>;
 
@@ -72,7 +86,8 @@ const ActivityDetails = () => {
                   <input
                     type="number"
                     value={
-                      sessionData.find((s) => s.name === metric.name)?.value || ''
+                      sessionData.find((s) => s.name === metric.name)?.value ||
+                      ''
                     }
                     onChange={(e) =>
                       setSessionData(
@@ -100,4 +115,3 @@ const ActivityDetails = () => {
 };
 
 export default ActivityDetails;
-
