@@ -1,16 +1,32 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',  // Ensure the base URL matches your backend
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  withCredentials: true, // Ensure cookies are sent with requests
 });
 
-// Automatically add Authorization header if token exists
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem('token'); // Get token from localStorage
-  if (token) {
-    req.headers.Authorization = `Bearer ${token}`;  // Add token to Authorization header
+API.interceptors.response.use(
+  (response) => response, // Pass through successful responses
+  async (error) => {
+    if (error.response?.status === 401 && error.response.data?.message === 'Invalid token') {
+      console.log('Access token expired. Attempting to refresh...');
+      try {
+        const { data } = await API.post('/auth/refresh');
+
+	console.log('New access token received:', data.accessToken);
+
+        localStorage.setItem('accessToken', data.accessToken);
+        error.config.headers.Authorization = `Bearer ${data.accessToken}`;
+        return API.request(error.config);
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+	//Redirect to login if refresh fails
+        localStorage.removeItem('accessToken');
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
   }
-  return req;
-});
+);
 
 export default API;

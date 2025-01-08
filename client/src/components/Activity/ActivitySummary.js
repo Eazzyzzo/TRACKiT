@@ -1,18 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Bar } from 'react-chartjs-2';
 import axios from 'axios';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-// Register Chart.js components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const ActivitySummary = () => {
   const { id } = useParams();
@@ -56,28 +44,6 @@ const ActivitySummary = () => {
 
   if (loading) return <p>Loading summary...</p>;
 
-  // Ensure sessions is an array before calling reduce
-  const cumulativeMetrics = sessions.reduce(
-    (acc, session) => {
-      acc[0] += session.metrics?.metric1 || 0;
-      acc[1] += session.metrics?.metric2 || 0;
-      acc[2] += session.metrics?.metric3 || 0;
-      return acc;
-    },
-    [0, 0, 0]
-  );
-
-  const barData = {
-    labels: ['Metric 1', 'Metric 2', 'Metric 3'],
-    datasets: [
-      {
-        label: 'Cumulative Metrics',
-        data: cumulativeMetrics,
-        backgroundColor: ['#ff6384', '#36a2eb', '#ffcd56'],
-      },
-    ],
-  };
-
   return (
     <div>
       <button onClick={() => navigate(-1)}>Back</button>
@@ -85,32 +51,29 @@ const ActivitySummary = () => {
       <h1>Activity Summary</h1>
 
       {/* Table of Sessions */}
-      <table>
+      <table style={{ borderSpacing: '10px' }}> 
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Time</th>
+            <th style={{ textAlign: 'center' }}>Date</th>
+            <th style={{ textAlign: 'center' }}>Time</th>
             {sessions.length > 0 &&
               Object.keys(sessions[0]?.metrics || {}).map((metric, index) => (
-                <th key={index}>{metric}</th>
+                <th key={index} style={{ textAlign: 'center' }}>{metric}</th>
               ))}
           </tr>
         </thead>
         <tbody>
           {sessions.map((session, index) => (
             <tr key={index}>
-              <td>{new Date(session.date).toLocaleDateString()}</td>
-              <td>{session.time}</td>
+              <td style={{ textAlign: 'center' }}>{new Date(session.date).toLocaleDateString()}</td>
+              <td style={{ textAlign: 'center' }}>{session.time}</td>
               {Object.values(session.metrics || {}).map((value, idx) => (
-                <td key={idx}>{value}</td>
+                <td key={idx} style={{ textAlign: 'center' }}>{value}</td>
               ))}
             </tr>
           ))}
         </tbody>
       </table>
-
-      {/* Bar Chart */}
-      <Bar data={barData} />
     </div>
   );
 };
