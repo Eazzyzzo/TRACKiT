@@ -4,33 +4,35 @@ import axios from 'axios';
 import CreateActivityForm from './Activity/CreateActivityForm';
 
 const Dashboard = ({ activities: initialActivities }) => {
-  const [activities, setActivities] = useState(initialActivities || []);
+  const [activities, setActivities] = useState(Array.isArray(initialActivities) ? initialActivities : []);
   const [refreshActivities, setRefreshActivities] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Track loading state
-  const [error, setError] = useState(null); // Store any errors
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        setIsLoading(true); 
+        setIsLoading(true);
         const token = localStorage.getItem('accessToken');
         const response = await axios.get('/api/activities', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        setActivities(response.data);
-        setError(null); // Clear any previous errors
-      } catch (error) {
-        if (error.response?.status === 401) {
-          localStorage.removeItem('accessToken');
-          window.location.href = '/login'; 
+
+        if (Array.isArray(response.data)) {
+          setActivities(response.data);
         } else {
-          setError(error);
-          console.error('Error fetching activities:', error);
+          console.error('Unexpected API response:', response.data);
+          setActivities([]);
         }
+
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching activities:', error);
+        setError(error);
       } finally {
-        setIsLoading(false); 
+        setIsLoading(false);
       }
     };
 
@@ -38,10 +40,6 @@ const Dashboard = ({ activities: initialActivities }) => {
       fetchActivities();
     }
   }, [refreshActivities, initialActivities]);
-
-  const handleActivityCreated = () => {
-    setRefreshActivities((prev) => !prev);
-  };
 
   const handleDeleteActivity = async (activityId) => {
     try {
@@ -53,7 +51,7 @@ const Dashboard = ({ activities: initialActivities }) => {
       alert('Activity deleted successfully!');
     } catch (error) {
       console.error('Error deleting activity:', error.response?.data || error.message);
-      // Consider displaying an error message to the user
+      alert('Failed to delete activity.');
     }
   };
 
@@ -62,11 +60,11 @@ const Dashboard = ({ activities: initialActivities }) => {
       <h1>Welcome to Your Dashboard</h1>
       <p>Track your daily activities and monitor progress.</p>
 
-      <Link to="/profile">
+	  {/*<Link to="/profile">
         <button>View Profile</button>
-      </Link>
+      </Link>*/}
 
-      <CreateActivityForm onActivityCreated={handleActivityCreated} />
+      <CreateActivityForm onActivityCreated={() => setRefreshActivities((prev) => !prev)} />
 
       {isLoading ? (
         <p>Loading activities...</p>
@@ -75,7 +73,7 @@ const Dashboard = ({ activities: initialActivities }) => {
       ) : (
         <div className="activities-section">
           <h2>Your Activities</h2>
-          {activities.length > 0 ? (
+          {Array.isArray(activities) && activities.length > 0 ? (
             <div className="activity-list">
               {activities.map((activity) => (
                 <div key={activity._id} className="activity-card">
@@ -101,3 +99,4 @@ const Dashboard = ({ activities: initialActivities }) => {
 };
 
 export default Dashboard;
+

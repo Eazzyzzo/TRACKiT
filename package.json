@@ -1,17 +1,16 @@
-{  
+{
   "name": "trackit",
   "version": "1.0.0",
+  "description": "Trackit App (Fullstack Deployment)",
+  "main": "index.js",
   "engines": {
     "node": "22.x"
-  }, "description": "",
-  "main": "index.js",
-  "scripts": {
-    "start": "node server/server.js",
-    "server": "nodemon server/server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "scripts": {
+    "start": "node server/server.js", 
+    "server": "nodemon server/server.js", 
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -23,5 +22,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
-  }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
