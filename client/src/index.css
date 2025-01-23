@@ -40,9 +40,9 @@ a:hover {
 /* Buttons */
 button {
   padding: 10px 15px;
-  border: none;
+  border: 1px solid #ddd;
   border-radius: 5px;
-  background-color: #007bff;
+  background-color: #3498db;
   color: #fff;
   font-size: 16px;
   cursor: pointer;

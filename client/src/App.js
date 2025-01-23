@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, /*Link*/ } from 'react-router-dom';
 import Home from './components/Home';
 import Register from './components/Register';
 import Login from './components/Login';
@@ -13,9 +13,9 @@ const App = () => {
   return (
     <Router>
       <div>
-        <nav>
+	  {/*<nav>
           <Link to="/">Home</Link>
-        </nav>
+        </nav>*/}
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
